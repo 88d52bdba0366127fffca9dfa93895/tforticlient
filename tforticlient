@@ -3,16 +3,15 @@
 set _server vpn.example.com
 set _port 443
 set _vpnuser tuanta
-set _vpnpass [exec echo xxxxxxxxxxxxxxxxxxxxxxxxxxxx | \
-    base64 -d | base64 -d | base64 -d ]
+set _enc_vpnpass xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+set _vpnpass [exec echo "$_enc_vpnpass" | openssl aes-256-cbc -a -d -salt ]
 
 spawn forticlientsslvpn_cli --server $_server:$_port --vpnuser $_vpnuser
 expect "Password for VPN:"
 send "$_vpnpass\n"
 expect "*Would you like to connect to this server? (Y/N)\r\n"
 send "y\n"
-expect "*STATUS::Tunnel running\r\n" {
-    exec bash ~/forticlient/script_fix_route.sh
-}
+expect "*STATUS::Tunnel running\r\n"
+exec bash /path/to/script_fix_route.sh
 
 interact
